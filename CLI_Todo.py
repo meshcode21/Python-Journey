@@ -1,7 +1,17 @@
 import os
+import json
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+def update_file():
+    # writing to file 
+    try:
+        with open("tasks.json",'w') as file:
+            json.dump(tasks,file,indent=4)
+    except Exception as error:
+        print("error: ",error)
+
 
 def add_task():
     title = input("\nEnter task title: ")
@@ -9,6 +19,7 @@ def add_task():
         print("\nTask title cannot be empty! 😥")
         return
     tasks.append({"title": title, "done": False})
+    update_file()
     print("Task added successfully!")
 
 def view_tasks():
@@ -28,31 +39,33 @@ def toggle_task():
             choice = int(input("\nEnter choice to toggle:"))
             if choice > 0 and choice <= len(tasks):
                 tasks[choice-1]["done"] = not tasks[choice-1]["done"]
+                update_file()
                 print("Updated successfully... 🥳")
                 break
             else:
                 print("Please choose within a range... ☹️")
         except ValueError:
-            print("Please enter valid input...!!! ☹️")
-            continue      
+            print("No changes made. Returning to menu 😊")
+            break      
 
 def delete_task():
     view_tasks()
     while True:
         try:
             choice = int(input("\nEnter choice to delete:"))
-            if input("Are you sure (y/n)?:") is 'n':
-                return
             
             if choice > 0 and choice <= len(tasks):
+                if input("Are you sure (y/n)?:") == 'n':
+                    return
                 tasks.pop(choice-1)
+                update_file()
                 print("Deleted successfully... 🤗")
                 break
             else:
                 print("Please choose within a range... ☹️")
         except ValueError:
-            print("Please enter valid input...!!! ☹️")
-            continue      
+            print("No changes made. Returning to menu 😊")
+            break  
 
 def show_counts():
     done = pending = 0
@@ -64,7 +77,6 @@ def show_counts():
     print(f"\n\nTotal: {len(tasks)} | Done: {done} | Pending: {pending}")
 
 def menu():
-    print
     print("""
     1. Add Task
     2. View Tasks
@@ -73,10 +85,17 @@ def menu():
     5. Exit
     """)
 
-tasks = [
-    {"title": "Learn Python", "done": False},
-    {"title": "Build ToDo App", "done": True},
-]
+# main global object to store actual data
+tasks = []
+
+try:
+    with open('tasks.json') as file:
+        data = file.read()
+        tasks = json.loads(data)
+  
+except FileNotFoundError:
+    with open('tasks.json','x') as file:
+        file.write("[]")
 
 while True:
     clear_screen()

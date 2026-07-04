@@ -3,6 +3,7 @@
 test.*
 *.log
 .DS_Store
+.venv/
 
 # media files
 *.png
